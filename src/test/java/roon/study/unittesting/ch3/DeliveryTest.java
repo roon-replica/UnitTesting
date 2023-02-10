@@ -27,18 +27,28 @@ class DeliveryTest {
     // [paramterized test 사용법]
     // https://stackoverflow.com/questions/61483452/parameterized-test-with-two-arguments-in-junit-5-jupiter
     @ParameterizedTest
-    @MethodSource("deliveryDateParams")
+    @MethodSource("invalidDeliveryDateParams")
     public void can_detect_an_invalid_delivery_date(int dateFromNow, boolean isValid) {
         LocalDate today = LocalDate.now();
         assertEquals(sut.isDeliveryDateValid(today.plusDays(dateFromNow)), isValid);
     }
 
-    private static List<Arguments> deliveryDateParams() {
+    private static List<Arguments> invalidDeliveryDateParams() {
         return List.of(
                 Arguments.of(-1, false),
                 Arguments.of(0, false),
-                Arguments.of(1, false),
-                Arguments.of(2, true)
+                Arguments.of(1, false)
         );
+    }
+
+    @ParameterizedTest
+    @MethodSource("validDeliveryDateParam")
+    public void the_soonest_delivery_date_is_two_days_from_now(int dateFromNow, boolean isValid) {
+        LocalDate today = LocalDate.now();
+        assertEquals(sut.isDeliveryDateValid(today.plusDays(dateFromNow)), isValid);
+    }
+
+    private static List<Arguments> validDeliveryDateParam() {
+        return List.of(Arguments.of(2, true));
     }
 }
