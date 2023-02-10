@@ -7,13 +7,10 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class CalculatorTest {
 
-    private int a, b;
     private Calculator sut;
 
     @BeforeEach
     public void init_dependencies() {
-        a = 1;
-        b = 1;
         sut = new Calculator();
     }
 
@@ -23,6 +20,9 @@ class CalculatorTest {
 
         // arrange
         // SUT(System Under Test, 테스트 대상 시스템)과 관련 의존성을 원하는 상태로 만들기
+        int[] inputs = createNumbers(1, 1);
+        int a = inputs[0];
+        int b = inputs[1];
 
         // act
         // 메서드 호출, 준비된 의존성을 전달?, 출력값 캡쳐
@@ -38,12 +38,19 @@ class CalculatorTest {
 
     @Test
     public void subtract_of_two_numbers() {
+        int[] inputs = createNumbers(1, 1);
+        int a = inputs[0];
+        int b = inputs[1];
 
         var ret = sut.subtract(a, b);
         System.out.println("subtraction = " + ret);
 
         assertEquals(0, ret);
 
+    }
+
+    private int[] createNumbers(int a, int b) {
+        return new int[]{a, b};
     }
 
 }
