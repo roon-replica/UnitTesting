@@ -2,8 +2,7 @@ package roon.study.unittesting.ch5;
 
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 public class OrderInteractionTest {
@@ -39,5 +38,35 @@ public class OrderInteractionTest {
         order.fill(warehouseMock);
 
         assertFalse(order.isFilled());
+    }
+
+    // order-warehouse 예제에서 order 실패 시 이메일 발송 요구사항 추가
+    @Test
+    public void testOrderSendsMailIfUnFilled_Using_Stub() {
+        Order order = new Order(productName, 51);
+        MailService mailServiceStub = new MailServiceStub(); // stub 사용
+        order.setMailService(mailServiceStub);
+
+        Warehouse warehouseMock = mock(Warehouse.class);
+        when(warehouseMock.getIfEnough(anyString(), anyInt())).thenReturn(false); // 어떤 입력이 오든 false 리턴
+
+        order.fill(warehouseMock);
+
+        assertEquals(1, mailServiceStub.numberSent());
+    }
+
+    @Test
+    public void testOrderSendsMailIfUnFilled_Using_Mock() {
+        Order order = new Order(productName, 51);
+
+        Warehouse warehouseMock = mock(Warehouse.class);
+        when(warehouseMock.getIfEnough(anyString(), anyInt())).thenReturn(false); // 어떤 입력이 오든 false 리턴
+
+        MailService mailServiceMock = mock(MailService.class);
+        order.setMailService(mailServiceMock);
+
+        order.fill(warehouseMock);
+
+        verify(mailServiceMock, times(1)).send(any());
     }
 }

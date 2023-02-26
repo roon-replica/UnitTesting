@@ -15,4 +15,11 @@ https://martinfowler.com/articles/mocksArentStubs.html
   - `state verification`: 테스트 메서드 실행 후 SUT, collaborator의 상태를 검증하는 방식
 
 ### 3. Mock 객체를 사용한 테스트 방식 
-- 
+
+
+### 4. Mock과 Stub의 차이
+- unit testing은 소프트웨어의 하나의 요소에 집중하는 것인데, 종종 warehouse처럼 다른 unit이 필요한 경우가 있어서 문제임
+- `Test Double` Gerard Meszaros의 책에서 나온 개념이라 함. dummy, fake, stubs, spies, mock 개념 소개함.
+  - 이 중에서 mock만 behavior 검증을 하고 나머지는 주로 state 검증..? 
+  - `stubs`: 미리 준비된 답변?
+  - `mock`: 객체임. expectation이 미리 설정됨. 항상 행동을 검증
