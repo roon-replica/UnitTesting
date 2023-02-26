@@ -13,3 +13,6 @@ https://martinfowler.com/articles/mocksArentStubs.html
 - Order, Warehouse 예시
   - Order가 `SUT`(OUT, Object Under Test)이고 Warehouse가 `collaborator`
   - `state verification`: 테스트 메서드 실행 후 SUT, collaborator의 상태를 검증하는 방식
+
+### 3. Mock 객체를 사용한 테스트 방식 
+- 
