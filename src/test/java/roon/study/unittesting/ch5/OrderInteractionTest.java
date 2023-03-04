@@ -44,7 +44,12 @@ public class OrderInteractionTest {
     @Test
     public void testOrderSendsMailIfUnFilled_Using_Stub() {
         Order order = new Order(productName, 51);
-        MailService mailServiceStub = new MailServiceStub(); // stub 사용
+
+        // stub 사용.
+        // 이걸 mock()으로 생성해도 도구로서의 mock임. 헷갈리지 말라고 함.
+        // 여기서 stub은 입력 데이터 설장만 하고 어떤 행위 검증도 안하는 반면
+        // testOrderSendsMailIfUnFilled_Using_Mock()에서 mock은 verify(...).send()로 행위를 검증하고 있다는게 차이점인듯!
+        MailService mailServiceStub = new MailServiceStub();
         order.setMailService(mailServiceStub);
 
         Warehouse warehouseMock = mock(Warehouse.class);
