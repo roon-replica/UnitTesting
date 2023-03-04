@@ -1,5 +1,7 @@
 package roon.study.unittesting.ch5;
 
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -12,6 +14,7 @@ public interface MailService {
     }
 }
 
+@Component
 class MailServiceStub implements MailService {
     private List<Message> messages = new ArrayList<>();
 
