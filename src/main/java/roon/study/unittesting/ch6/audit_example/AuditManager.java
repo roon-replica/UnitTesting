@@ -3,17 +3,13 @@ package roon.study.unittesting.ch6.audit_example;
 import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.stereotype.Component;
 
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDateTime;
-import java.util.Arrays;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -23,8 +19,12 @@ public class AuditManager {
     @Autowired
     private AuditProperties auditProperties;
 
-    public AuditManager(int maxEntriesPerFile, String directoryName) {
+    @Autowired
+    private FileInterface fileInterface;
+
+    public AuditManager(int maxEntriesPerFile, String directoryName, FileInterface fileInterface) {
         this.auditProperties = new AuditProperties(maxEntriesPerFile, directoryName);
+        this.fileInterface = fileInterface;
     }
 
     public void addRecord(String visitorName, LocalDateTime timeOfVisit) throws IOException {
@@ -37,36 +37,30 @@ public class AuditManager {
         // 디렉토리, 파일 생성: https://www.baeldung.com/java-io-file
         // 파일에 쓰기: https://www.baeldung.com/java-append-to-file
 
-        File directory = new File("./" + auditProperties.getDirectoryName());
-        if (!directory.isDirectory()) {
-            directory.mkdir();
-        }
 
-        var sortedExistingFiles = Arrays.stream(directory.listFiles())
-                .sorted(File::compareTo).toList();
+        Path directoryPath = Path.of("./" + auditProperties.getDirectoryName());
+        fileInterface.mkdir(directoryPath);
+
+        var sortedExistingFilePaths = fileInterface.getAllFilePaths(directoryPath)
+                .sorted().toList();
+
         String contents = visitorName + " " + timeOfVisit.toString();
 
-        if (sortedExistingFiles.isEmpty()) {
-            String filename = "audit_1.txt";
-            File firstFile = new File(directory, filename);
-            firstFile.createNewFile();
-
-            writeFile(firstFile.getAbsolutePath(), contents);
+        if (sortedExistingFilePaths.isEmpty()) {
+            Path filePath = Path.of(directoryPath + "/audit_1.txt");
+            fileInterface.writeToFile(filePath, contents);
 
         } else {
-            int fileCount = sortedExistingFiles.size();
-            var lastFile = sortedExistingFiles.get(fileCount - 1);
+            int fileCount = sortedExistingFilePaths.size();
+            var lastFilePath = sortedExistingFilePaths.get(fileCount - 1);
 
-            int fileLineCount = (int) Files.lines(lastFile.toPath()).count();
+            int fileLineCount = fileInterface.getLineCount(lastFilePath);
 
             if (fileLineCount >= auditProperties.getMaxEntriesPerFile()) {
-                String filename = "audit_" + (fileCount + 1) + ".txt";
-                File newFile = new File(directory, filename);
-                newFile.createNewFile();
-
-                writeFile(newFile.getAbsolutePath(), contents);
+                Path filePath = Path.of(directoryPath + "/audit_" + (fileCount + 1) + ".txt");
+                fileInterface.writeToFile(filePath, contents);
             } else {
-                writeFile(lastFile.getAbsolutePath(), contents);
+                fileInterface.writeToFile(lastFilePath, contents);
             }
         }
     }
