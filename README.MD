@@ -6,3 +6,9 @@
 
 ### 참고자료
 - Unit Testing (블라디미르 코리코프(MS MVP..!) 지음, 임준혁 옮김)
+- 좋은 오픈소스 프로젝트의 테스트 코드 참고
+  - ex) spring security
+    
+
+- 디렉토리, 파일 생성: https://www.baeldung.com/java-io-file  
+  파일에 쓰기: https://www.baeldung.com/java-append-to-file
