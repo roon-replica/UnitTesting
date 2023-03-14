@@ -1,79 +1,42 @@
 package roon.study.unittesting.ch6.audit_example;
 
-import lombok.AllArgsConstructor;
 import lombok.NoArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import java.io.BufferedWriter;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.nio.file.Path;
 import java.time.LocalDateTime;
+import java.util.Comparator;
+import java.util.List;
 
-@AllArgsConstructor
 @NoArgsConstructor
 @Component
 public class AuditManager {
 
-    @Autowired
-    private AuditProperties auditProperties;
+    @Value("${ch6.audit.maxEntriesPerFile}")
+    private int maxEntriesPerFile;
 
-    @Autowired
-    private FileInterface fileInterface;
-
-    public AuditManager(int maxEntriesPerFile, String directoryName, FileInterface fileInterface) {
-        this.auditProperties = new AuditProperties(maxEntriesPerFile, directoryName);
-        this.fileInterface = fileInterface;
+    public AuditManager(int maxEntriesPerFile) {
+        this.maxEntriesPerFile = maxEntriesPerFile;
     }
 
-    public void addRecord(String visitorName, LocalDateTime timeOfVisit) throws IOException {
-        // dir exist?
-        // get files. exist at least one?
-        // get last
-        // over max entries count?
-        // create new file or else append
-
-        // 디렉토리, 파일 생성: https://www.baeldung.com/java-io-file
-        // 파일에 쓰기: https://www.baeldung.com/java-append-to-file
-
-
-        Path directoryPath = Path.of("./" + auditProperties.getDirectoryName());
-        fileInterface.mkdir(directoryPath);
-
-        var sortedExistingFilePaths = fileInterface.getAllFilePaths(directoryPath)
-                .sorted().toList();
+    public FileUpdate addRecord(List<FileContent> fileContents, String visitorName, LocalDateTime timeOfVisit) {
+        fileContents.sort(Comparator.comparing(FileContent::getFilename));
+        var sortedExistingFilePaths = fileContents;
 
         String contents = visitorName + " " + timeOfVisit.toString();
 
         if (sortedExistingFilePaths.isEmpty()) {
-            Path filePath = Path.of(directoryPath + "/audit_1.txt");
-            fileInterface.writeToFile(filePath, contents);
+            return new FileUpdate("audit_1.txt", contents);
 
         } else {
             int fileCount = sortedExistingFilePaths.size();
-            var lastFilePath = sortedExistingFilePaths.get(fileCount - 1);
+            int fileLineCount = sortedExistingFilePaths.get(fileCount - 1).getFileLineCount();
 
-            int fileLineCount = fileInterface.getLineCount(lastFilePath);
-
-            if (fileLineCount >= auditProperties.getMaxEntriesPerFile()) {
-                Path filePath = Path.of(directoryPath + "/audit_" + (fileCount + 1) + ".txt");
-                fileInterface.writeToFile(filePath, contents);
+            if (fileLineCount >= maxEntriesPerFile) {
+                return new FileUpdate("/audit_" + (fileCount + 1) + ".txt", contents);
             } else {
-                fileInterface.writeToFile(lastFilePath, contents);
+                return new FileUpdate("/audit_" + fileCount + ".txt", contents);
             }
         }
-    }
-
-    private void writeFile(String filename, String contents) throws IOException {
-        FileWriter fileWriter = new FileWriter(filename, true);
-        BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-
-        System.out.println(contents);
-
-        bufferedWriter.write(contents);
-        bufferedWriter.newLine();
-        bufferedWriter.flush();
-        bufferedWriter.close();
     }
 }

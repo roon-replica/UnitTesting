@@ -10,15 +10,15 @@ import java.time.LocalDateTime;
 @RestController
 public class AuditController {
 
-    private AuditManager auditManager;
+    private AuditPersistApplicationService applicationService;
 
-    public AuditController(AuditManager auditManager) {
-        this.auditManager = auditManager;
+    public AuditController(AuditPersistApplicationService applicationService) {
+        this.applicationService = applicationService;
     }
 
     @GetMapping("/visit/{visitorName}")
     public String visit(@PathVariable String visitorName) throws IOException {
-        auditManager.addRecord(visitorName, LocalDateTime.now());
+        applicationService.addRecord(visitorName,LocalDateTime.now());
 
         return visitorName + " " + LocalDateTime.now();
     }
