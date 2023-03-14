@@ -20,7 +20,7 @@ class AuditManagerTest {
     @Test
     public void givenDirName_whenAddRecord_thenDirDeleted() throws IOException {
         String directoryName = "audit_results";
-        FileInterface fileInterface = new ConcreteFileInterface();
+        FileInterface fileInterface = new FileInterfaceImpl();
         AuditManager auditManager = new AuditManager(1, directoryName, fileInterface);
         auditManager.addRecord("visitor1", LocalDateTime.now());
 
