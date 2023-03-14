@@ -7,10 +7,11 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 //@SpringBootTest
 class AuditManagerTest {
@@ -20,9 +21,17 @@ class AuditManagerTest {
     @Test
     public void givenDirName_whenAddRecord_thenDirDeleted() throws IOException {
         String directoryName = "audit_results";
+        AuditManager sut = new AuditManager(1);
         FileInterface fileInterface = new FileInterfaceImpl();
-        AuditManager auditManager = new AuditManager(1, directoryName, fileInterface);
-        auditManager.addRecord("visitor1", LocalDateTime.now());
+
+        Persister persister = new Persister(new AuditProperties(1, directoryName), fileInterface);
+
+        var fileContents = Arrays.asList(
+                new FileContent("audit_1.txt", 3),
+                new FileContent("audit_2.txt", 3)
+        );
+
+        sut.addRecord(fileContents, "visitor1", LocalDateTime.now());
 
         deleteDirectory(directoryName);
     }
@@ -46,25 +55,21 @@ class AuditManagerTest {
     @Test
     public void A_new_file_is_created_when_the_current_file_overflows() throws IOException {
         Path directoryPath = Path.of("./audit_results");
-        var fileSystemMock = mock(FileInterface.class);
-        when(fileSystemMock.getAllFilePaths(directoryPath)).thenReturn(
-                Stream.of(
-                        Path.of("./audit_results/audit_1.txt"),
-                        Path.of("./audit_results/audit_2.txt")
-                )
+        var fileContents = Arrays.asList(
+                new FileContent("audit_1.txt", 3),
+                new FileContent("audit_2.txt", 3)
         );
 
         final int maxLinesPerFile = 3;
         Path lastFilePath = Path.of("./audit_results/audit_2.txt");
-        when(fileSystemMock.getLineCount(lastFilePath)).thenReturn(maxLinesPerFile);
 
-        AuditManager sut = new AuditManager(maxLinesPerFile, "audit_results", fileSystemMock);
-        String visitorName = "roon";
+        AuditManager sut = new AuditManager(maxLinesPerFile);
         LocalDateTime now = LocalDateTime.now();
-        sut.addRecord(visitorName, now);
+        FileUpdate fileUpdateCommand = sut.addRecord(fileContents, "roon", now);
 
-        Path nextFilePath = Path.of("./audit_results/audit_3.txt");
-        verify(fileSystemMock).writeToFile(nextFilePath, visitorName + " " + now);
+        assertEquals(fileUpdateCommand.getFilename(), "/audit_3.txt");
+        assertTrue(fileUpdateCommand.getContents().contains(now.toString()));
+
     }
 
 }
