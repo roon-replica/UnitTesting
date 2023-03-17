@@ -24,11 +24,13 @@ public class UserApplicationService {
 
         User user = userStorage.getUserById(userId);
         String sampleCompanyName = "naver";
-        CompanyData companyData = companyStorage.getCompanyByName(sampleCompanyName);
+        Company company = companyStorage.getCompanyByName(sampleCompanyName);
 
-        int numberOfEmployees = user.changeEmail(newEmail, companyData.getEmailDomain(), companyData.getNumberOfEmployees());
-        companyStorage.save(sampleCompanyName, new CompanyData(sampleCompanyName, companyData.getEmailDomain(), numberOfEmployees));
+        user.changeEmail(newEmail, company);
+
+        companyStorage.save(sampleCompanyName, company);
         userStorage.save(userId, user);
+
         messageBus.sendEmailChangedCommand(userId, newEmail);
     }
 }

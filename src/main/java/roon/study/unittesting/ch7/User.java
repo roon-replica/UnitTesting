@@ -10,24 +10,17 @@ public class User {
     private String email;
     private UserType type;
 
-    public int changeEmail(String newEmail, String companyEmailDomain, int existingEmployeesCount) {
-        if (email.equals(newEmail)) return existingEmployeesCount;
+    public void changeEmail(String newEmail, Company company) {
+        if (email.equals(newEmail)) return;
 
-        String newEmailDomain = newEmail.split("@")[1];
-        boolean isEmailCorporate = newEmailDomain.equals(companyEmailDomain);
-        UserType newUserType = isEmailCorporate ? UserType.Employee : UserType.Customer;
+        UserType newUserType = company.isEmailCorporate(newEmail) ? UserType.Employee : UserType.Customer;
 
-        int employeesCount = existingEmployeesCount;
         if (!type.equals(newUserType)) {
             int delta = newUserType.equals(UserType.Employee) ? 1 : -1;
-            int modifiedEmployeesCount = existingEmployeesCount + delta;
-            employeesCount = modifiedEmployeesCount;
+            company.changeNumberOfEmployees(delta);
         }
 
         this.email = newEmail;
         this.type = newUserType;
-
-        return employeesCount;
-
     }
 }

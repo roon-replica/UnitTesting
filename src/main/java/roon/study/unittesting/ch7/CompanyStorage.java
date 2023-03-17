@@ -7,13 +7,13 @@ import java.util.Map;
 
 @Component
 public class CompanyStorage {
-    private static Map<String, CompanyData> storage = new HashMap<>();
+    private static Map<String, Company> storage = new HashMap<>();
 
-    public CompanyData getCompanyByName(String companyName) {
+    public Company getCompanyByName(String companyName) {
         return storage.get(companyName);
     }
 
-    public void save(String companyName, CompanyData company) {
+    public void save(String companyName, Company company) {
         storage.put(companyName, company);
     }
 }
